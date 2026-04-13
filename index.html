@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Zamena Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#080810;--bg2:#10101E;--bg3:#16162A;--bg4:#1E1E38;
+  --accent:#7C4DFF;--accent2:#448AFF;--red:#E94560;
+  --green:#00FF88;--tg:#229ED9;
+  --text:#CDD6F4;--sub:#8892B0;--border:#2A2A4A;
+  --head:'Rajdhani',sans-serif;--body:'Nunito',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh}
+header{background:var(--bg2);border-bottom:2px solid var(--accent);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 4px 30px rgba(124,77,255,.25)}
+.logo{font-family:var(--head);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:3px}
+.logo span{color:var(--text)}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;margin-left:auto}
+.stxt{font-size:11px;color:var(--green);font-family:monospace}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px;display:grid;grid-template-columns:320px 1fr;gap:20px}
+@media(max-width:800px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--bg2);border:1px solid var(--border);overflow:hidden}
+.ch{background:var(--bg3);padding:12px 18px;border-bottom:1px solid var(--border);font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.ch .d{width:6px;height:6px;background:var(--accent);border-radius:50%}
+.cb{padding:18px}
+.field{margin-bottom:14px}
+label{display:block;font-family:monospace;font-size:11px;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+input,textarea,select{width:100%;background:var(--bg4);border:1px solid var(--border);color:var(--text);font-family:var(--body);font-size:14px;padding:9px 11px;outline:none;transition:border-color .2s}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:70px}
+select option{background:var(--bg4)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;font-family:var(--head);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;outline:none;width:100%}
+.btn-p{background:var(--accent);color:#fff}
+.btn-p:hover{background:#9B6DFF}
+.btn-s{background:#00AA55;color:#fff}
+.btn-s:hover{background:var(--green);color:#000}
+.btn-d{background:#C0003A;color:#fff}
+.btn-d:hover{background:var(--red)}
+.btn-g{background:transparent;color:var(--sub);border:1px solid var(--border)}
+.btn-g:hover{border-color:var(--accent);color:var(--accent)}
+.btn-tg{background:var(--tg);color:#fff}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:12px}
+.toggle{position:relative;width:50px;height:26px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--bg4);border:1px solid var(--border);cursor:pointer;transition:.3s;border-radius:26px}
+.slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:var(--sub);transition:.3s;border-radius:50%}
+input:checked+.slider{background:rgba(0,255,136,.15);border-color:var(--green)}
+input:checked+.slider:before{transform:translateX(24px);background:var(--green);box-shadow:0 0 8px var(--green)}
+.alert{padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.alert-s{background:rgba(0,255,136,.1);border-left:3px solid var(--green);color:var(--green)}
+.alert-e{background:rgba(233,69,96,.1);border-left:3px solid var(--red);color:var(--red)}
+.alert.show{display:block}
+.gcard{background:var(--bg3);border:1px solid var(--border);padding:12px;display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;transition:border-color .2s}
+.gcard:hover{border-color:var(--accent)}
+.gcard img{width:70px;height:52px;object-fit:cover;background:var(--bg4);flex-shrink:0}
+.gcard-info{flex:1;min-width:0}
+.gcard-info h4{font-family:var(--head);font-size:14px;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard-info p{font-size:12px;color:var(--sub);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tag{display:inline-block;background:rgba(124,77,255,.15);color:var(--accent);font-size:10px;padding:2px 7px;margin-bottom:5px;font-family:monospace}
+.gcard-actions{display:flex;gap:6px;flex-shrink:0}
+.btn-sm{padding:6px 12px;font-size:11px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-h{background:var(--bg3);padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-family:var(--head);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.modal-x{background:none;border:none;color:var(--sub);font-size:18px;cursor:pointer}
+.modal-x:hover{color:var(--red)}
+.modal-b{padding:18px}
+.sep{border:none;border-top:1px solid var(--border);margin:14px 0}
+.color-row{display:flex;gap:8px;align-items:center}
+.color-row input[type=color]{width:44px;height:36px;padding:2px;border:1px solid var(--border);background:var(--bg4);cursor:pointer}
+.color-row input[type=text]{flex:1}
+.stats{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--bg2);border:1px solid var(--border);padding:14px;text-align:center}
+.stat-n{font-family:var(--head);font-size:28px;font-weight:700;color:var(--accent)}
+.stat-l{font-family:monospace;font-size:11px;color:var(--sub);margin-top:4px;text-transform:uppercase}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border)}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.img-prev{width:100%;height:110px;object-fit:cover;background:var(--bg4);border:1px solid var(--border);margin-top:7px;display:none}
+.img-prev.show{display:block}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+.section-title{font-family:var(--head);font-size:12px;color:var(--sub);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;margin-top:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">ZAMENA <span>ADMIN</span></div>
+  <div class="sdot" id="sDot"></div>
+  <span class="stxt" id="sTxt">CONNECTING...</span>
+</header>
+
+<div class="wrap">
+
+<!-- СТАТИСТИКА -->
+<div class="stats">
+  <div class="stat"><div class="stat-n" id="stGames">0</div><div class="stat-l">Игр</div></div>
+  <div class="stat"><div class="stat-n" id="stStatus" style="font-size:18px;color:var(--green)">● ON</div><div class="stat-l">Статус</div></div>
+  <div class="stat"><div class="stat-n" id="stFb" style="font-size:14px;color:var(--sub)">—</div><div class="stat-l">Firebase</div></div>
+  <div class="stat"><button class="btn btn-p btn-sm" onclick="loadAll()" style="margin-top:6px">↺ Обновить</button><div class="stat-l" style="margin-top:8px">Данные</div></div>
+</div>
+
+<!-- ЛЕВАЯ КОЛОНКА -->
+<div style="display:flex;flex-direction:column;gap:18px">
+
+  <!-- ПОДКЛЮЧЕНИЕ -->
+  <div class="card" id="fbCard">
+    <div class="ch"><div class="d"></div> Firebase</div>
+    <div class="cb">
+      <div class="field"><label>Project ID</label><input type="text" id="cfgPid" placeholder="zamena-c4c7f"/></div>
+      <div class="field"><label>API Key</label><input type="text" id="cfgKey" placeholder="AIzaSy..."/></div>
+      <div id="alCon" class="alert"></div>
+      <button class="btn btn-s" onclick="connectFb()">⚡ Подключить</button>
+    </div>
+  </div>
+
+  <!-- СЕРВЕР ВКЛ/ВЫКЛ -->
+  <div class="card">
+    <div class="ch"><div class="d" style="background:var(--green)"></div> Сервер</div>
+    <div class="cb">
+      <div class="toggle-row">
+        <div><div style="font-size:14px">🟢 Приложение активно</div><div style="font-size:12px;color:var(--sub)">Выключи — покажет экран обновления</div></div>
+        <label class="toggle"><input type="checkbox" id="swEnabled" checked onchange="saveConfig()"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div style="font-size:14px">👋 Показать welcome попап</div><div style="font-size:12px;color:var(--sub)">При открытии приложения</div></div>
+        <label class="toggle"><input type="checkbox" id="swWelcome" onchange="saveConfig()"><span class="slider"></span></label>
+      </div>
+      <div class="field"><label>Сообщение обновления</label><textarea id="fUpdateMsg" rows="2">Приложение обновляется!</textarea></div>
+      <div id="alCfg" class="alert"></div>
+      <button class="btn btn-p" onclick="saveConfig()">💾 Сохранить</button>
+    </div>
+  </div>
+
+  <!-- НАСТРОЙКИ ДИЗАЙНА -->
+  <div class="card">
+    <div class="ch"><div class="d" style="background:#FF6B6B"></div> Дизайн</div>
+    <div class="cb">
+      <div class="section-title">Акцентные цвета</div>
+      <div class="field">
+        <label>Цвет 1 (левый)</label>
+        <div class="color-row">
+          <input type="color" id="cpColor1" value="#7C4DFF" oninput="syncColor('fColor1','cpColor1')"/>
+          <input type="text" id="fColor1" value="#7C4DFF" oninput="syncColor2('fColor1','cpColor1')"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Цвет 2 (правый)</label>
+        <div class="color-row">
+          <input type="color" id="cpColor2" value="#448AFF" oninput="syncColor('fColor2','cpColor2')"/>
+          <input type="text" id="fColor2" value="#448AFF" oninput="syncColor2('fColor2','cpColor2')"/>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="section-title">Тексты шапки</div>
+      <div class="field"><label>Заголовок welcome</label><input type="text" id="fWTitle" value="Добро пожаловать 👋"/></div>
+      <div class="field"><label>Подзаголовок welcome</label><input type="text" id="fWSub" value="Исследуй лучший контент"/></div>
+      <div class="sep"></div>
+      <div class="section-title">Попапы</div>
+      <div class="field"><label>Текст welcome попапа</label><textarea id="fWPopup" rows="2" placeholder="Текст при открытии..."></textarea></div>
+      <div class="field"><label>Заголовок "отключено"</label><input type="text" id="fDisTitle" value="Доступ ограничен"/></div>
+      <div class="field"><label>Текст "отключено"</label><textarea id="fDisMsg" rows="2" placeholder="Сообщение когда выключено..."></textarea></div>
+      <div class="sep"></div>
+      <div class="section-title">Ссылки</div>
+      <div class="field"><label>Ссылка Telegram</label><input type="url" id="fTgLink" value="https://t.me/+xuNO48uB7QNlYTUy"/></div>
+      <div id="alDesign" class="alert"></div>
+      <button class="btn btn-p" onclick="saveDesign()">🎨 Сохранить дизайн</button>
+    </div>
+  </div>
+
+  <!-- ДОБАВИТЬ ИГРУ -->
+  <div class="card">
+    <div class="ch"><div class="d" style="background:var(--tg)"></div> Добавить игру</div>
+    <div class="cb">
+      <div class="field"><label>Название</label><input type="text" id="fTitle" placeholder="Minecraft PE"/></div>
+      <div class="field"><label>Описание</label><textarea id="fDesc" rows="2" placeholder="Описание..."></textarea></div>
+      <div class="field">
+        <label>URL картинки</label>
+        <input type="url" id="fImg" placeholder="https://i.imgur.com/..." oninput="prevImg()"/>
+        <img id="imgPrev" class="img-prev" alt="preview"/>
+      </div>
+      <div class="field"><label>Ссылка скачать</label><input type="url" id="fDl" placeholder="https://..."/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Категория</label>
+          <select id="fCat"><option>APK</option><option>MOD APK</option><option>Game</option><option>App</option><option>Patch</option></select>
+        </div>
+        <div class="field"><label>Размер</label><input type="text" id="fSize" placeholder="150 MB"/></div>
+      </div>
+      <div id="alAdd" class="alert"></div>
+      <button class="btn btn-p" id="btnAdd" onclick="addGame()">+ ДОБАВИТЬ</button>
+    </div>
+  </div>
+
+</div><!-- end left -->
+
+<!-- ПРАВАЯ КОЛОНКА: список игр -->
+<div class="card" style="align-self:start">
+  <div class="ch"><div class="d" style="background:#FF6B6B"></div> Список игр <span id="gCount" style="font-size:12px;color:var(--sub);margin-left:auto;font-family:monospace">0 игр</span></div>
+  <div class="cb">
+    <div id="gamesList">
+      <div style="text-align:center;padding:30px 0;color:var(--sub);font-family:monospace;font-size:13px">// Подключите Firebase...</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end wrap -->
+
+<!-- MODAL РЕДАКТИРОВАНИЯ -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-h">✏️ Редактировать <button class="modal-x" onclick="closeModal()">✕</button></div>
+    <div class="modal-b">
+      <input type="hidden" id="editId"/>
+      <div class="field"><label>Название</label><input type="text" id="eTitle"/></div>
+      <div class="field"><label>Описание</label><textarea id="eDesc" rows="2"></textarea></div>
+      <div class="field"><label>URL картинки</label><input type="url" id="eImg" oninput="prevEditImg()"/></div>
+      <img id="eImgPrev" class="img-prev" alt="preview"/>
+      <div class="field" style="margin-top:8px"><label>Ссылка скачать</label><input type="url" id="eDl"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Категория</label>
+          <select id="eCat"><option>APK</option><option>MOD APK</option><option>Game</option><option>App</option><option>Patch</option></select>
+        </div>
+        <div class="field"><label>Размер</label><input type="text" id="eSize"/></div>
+      </div>
+      <div id="alEdit" class="alert"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-g" onclick="closeModal()" style="flex:1">Отмена</button>
+        <button class="btn btn-p" onclick="saveEdit()" style="flex:2">💾 Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let PID='', KEY='', connected=false, gamesData=[];
+
+const BASE=()=>`https://firestore.googleapis.com/v1/projects/${PID}/databases/(default)/documents`;
+const AUTH=()=>`key=${KEY}`;
+
+async function fsGet(p){const r=await fetch(`${BASE()}/${p}?${AUTH()}`);if(!r.ok)throw new Error(await r.text());return r.json()}
+async function fsPatch(p,fields){
+  const keys=Object.keys(fields).map(k=>`updateMask.fieldPaths=${k}`).join('&');
+  const r=await fetch(`${BASE()}/${p}?${AUTH()}&${keys}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:toFs(fields)})});
+  if(!r.ok)throw new Error(await r.text());return r.json();
+}
+async function fsPost(col,fields){
+  const r=await fetch(`${BASE()}/${col}?${AUTH()}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:toFs(fields)})});
+  if(!r.ok)throw new Error(await r.text());return r.json();
+}
+async function fsDel(p){const r=await fetch(`${BASE()}/${p}?${AUTH()}`,{method:'DELETE'});if(!r.ok)throw new Error(await r.text())}
+
+function toFs(obj){const o={};for(const[k,v]of Object.entries(obj)){if(typeof v==='boolean')o[k]={booleanValue:v};else o[k]={stringValue:String(v??'')};}return o}
+function fromFs(doc){const f=doc.fields||{},o={};for(const[k,v]of Object.entries(f)){if(v.booleanValue!==undefined)o[k]=v.booleanValue;else o[k]=v.stringValue??'';}o._id=doc.name?doc.name.split('/').pop():'';return o}
+
+async function connectFb(){
+  const pid=document.getElementById('cfgPid').value.trim();
+  const key=document.getElementById('cfgKey').value.trim();
+  if(!pid||!key){showAlert('alCon','e','Заполни Project ID и API Key');return}
+  PID=pid;KEY=key;
+  try{
+    await fsGet('config/main');
+    connected=true;
+    localStorage.setItem('zPid',pid);localStorage.setItem('zKey',key);
+    showAlert('alCon','s','✓ Подключено!');
+    setStatus(true);
+    document.getElementById('stFb').textContent='OK';
+    document.getElementById('stFb').style.color='var(--green)';
+    loadAll();
+  }catch(e){
+    try{
+      await fsPatch('config/main',{enabled:true,updateMessage:'Обновление...',accentColor:'#7C4DFF',accentColor2:'#448AFF',tgLink:'https://t.me/+xuNO48uB7QNlYTUy',welcomeTitle:'Добро пожаловать 👋',welcomeSubtitle:'Исследуй лучший контент',welcomePopup:'',showWelcome:false,disabledTitle:'Доступ ограничен',disabledMsg:'Функция временно недоступна'});
+      connected=true;localStorage.setItem('zPid',pid);localStorage.setItem('zKey',key);
+      showAlert('alCon','s','✓ Подключено! Config создан.');setStatus(true);loadAll();
+    }catch(e2){showAlert('alCon','e','Ошибка: '+e2.message)}
+  }
+}
+
+async function loadAll(){if(!connected)return;loadCfg();loadGames()}
+
+async function loadCfg(){
+  try{
+    const d=fromFs(await fsGet('config/main'));
+    document.getElementById('swEnabled').checked=d.enabled!==false;
+    document.getElementById('swWelcome').checked=!!d.showWelcome;
+    if(d.updateMessage)document.getElementById('fUpdateMsg').value=d.updateMessage;
+    if(d.accentColor){document.getElementById('fColor1').value=d.accentColor;try{document.getElementById('cpColor1').value=d.accentColor}catch(e){}}
+    if(d.accentColor2){document.getElementById('fColor2').value=d.accentColor2;try{document.getElementById('cpColor2').value=d.accentColor2}catch(e){}}
+    if(d.welcomeTitle)document.getElementById('fWTitle').value=d.welcomeTitle;
+    if(d.welcomeSubtitle)document.getElementById('fWSub').value=d.welcomeSubtitle;
+    if(d.welcomePopup)document.getElementById('fWPopup').value=d.welcomePopup;
+    if(d.disabledTitle)document.getElementById('fDisTitle').value=d.disabledTitle;
+    if(d.disabledMsg)document.getElementById('fDisMsg').value=d.disabledMsg;
+    if(d.tgLink)document.getElementById('fTgLink').value=d.tgLink;
+    setStatus(d.enabled!==false);
+  }catch(e){}
+}
+
+async function saveConfig(){
+  if(!connected){showAlert('alCfg','e','Подключи Firebase');return}
+  try{
+    await fsPatch('config/main',{
+      enabled:document.getElementById('swEnabled').checked,
+      showWelcome:document.getElementById('swWelcome').checked,
+      updateMessage:document.getElementById('fUpdateMsg').value
+    });
+    showAlert('alCfg','s',document.getElementById('swEnabled').checked?'✓ Приложение ВКЛЮЧЕНО':'⚠ Приложение ВЫКЛЮЧЕНО');
+    setStatus(document.getElementById('swEnabled').checked);
+  }catch(e){showAlert('alCfg','e','Ошибка: '+e.message)}
+}
+
+async function saveDesign(){
+  if(!connected){showAlert('alDesign','e','Подключи Firebase');return}
+  try{
+    await fsPatch('config/main',{
+      accentColor:document.getElementById('fColor1').value,
+      accentColor2:document.getElementById('fColor2').value,
+      welcomeTitle:document.getElementById('fWTitle').value,
+      welcomeSubtitle:document.getElementById('fWSub').value,
+      welcomePopup:document.getElementById('fWPopup').value,
+      disabledTitle:document.getElementById('fDisTitle').value,
+      disabledMsg:document.getElementById('fDisMsg').value,
+      tgLink:document.getElementById('fTgLink').value
+    });
+    showAlert('alDesign','s','✓ Дизайн сохранён! Приложение обновится.');
+  }catch(e){showAlert('alDesign','e','Ошибка: '+e.message)}
+}
+
+async function loadGames(){
+  try{
+    const data=await fsGet('games');
+    gamesData=(data.documents||[]).map(fromFs);
+    renderGames();
+    document.getElementById('stGames').textContent=gamesData.length;
+    document.getElementById('gCount').textContent=gamesData.length+' игр';
+  }catch(e){document.getElementById('gamesList').innerHTML=`<div style="color:var(--red);font-family:monospace;font-size:12px;padding:16px">Ошибка: ${e.message}</div>`}
+}
+
+function renderGames(){
+  const el=document.getElementById('gamesList');
+  if(!gamesData.length){el.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--sub);font-family:monospace;font-size:13px">// Нет игр. Добавьте первую!</div>';return}
+  el.innerHTML=gamesData.map((g,i)=>`
+    <div class="gcard">
+      <img src="${g.imageUrl||''}" alt="" onerror="this.style.background='var(--bg4)';this.removeAttribute('src')"/>
+      <div class="gcard-info">
+        <div class="tag">${g.category||'APK'}</div>
+        <h4>${esc(g.title)}</h4>
+        <p>${esc(g.description)}</p>
+        ${g.size?`<div style="font-size:11px;color:var(--border);margin-top:3px;font-family:monospace">📦 ${g.size}</div>`:''}
+      </div>
+      <div class="gcard-actions">
+        <button class="btn btn-g btn-sm" onclick="openEdit(${i})" title="Редактировать">✏️</button>
+        <button class="btn btn-d btn-sm" onclick="delGame('${g._id}')" title="Удалить">🗑</button>
+      </div>
+    </div>`).join('')
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+async function addGame(){
+  if(!connected){showAlert('alAdd','e','Подключи Firebase');return}
+  const title=document.getElementById('fTitle').value.trim();
+  const dl=document.getElementById('fDl').value.trim();
+  if(!title||!dl){showAlert('alAdd','e','Название и ссылка обязательны');return}
+  const btn=document.getElementById('btnAdd');
+  btn.innerHTML='<span class="spin"></span> Добавляю...';btn.disabled=true;
+  try{
+    await fsPost('games',{
+      title,
+      description:document.getElementById('fDesc').value,
+      imageUrl:document.getElementById('fImg').value,
+      downloadUrl:dl,
+      category:document.getElementById('fCat').value,
+      size:document.getElementById('fSize').value
+    });
+    showAlert('alAdd','s','✓ Игра добавлена!');
+    ['fTitle','fDesc','fImg','fDl','fSize'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('imgPrev').classList.remove('show');
+    loadGames();
+  }catch(e){showAlert('alAdd','e','Ошибка: '+e.message)}
+  finally{btn.innerHTML='+ ДОБАВИТЬ';btn.disabled=false}
+}
+
+async function delGame(id){
+  if(!confirm('Удалить игру?'))return;
+  try{await fsDel('games/'+id);loadGames()}catch(e){alert('Ошибка: '+e.message)}
+}
+
+function openEdit(i){
+  const g=gamesData[i];
+  document.getElementById('editId').value=g._id;
+  document.getElementById('eTitle').value=g.title||'';
+  document.getElementById('eDesc').value=g.description||'';
+  document.getElementById('eImg').value=g.imageUrl||'';
+  document.getElementById('eDl').value=g.downloadUrl||'';
+  document.getElementById('eCat').value=g.category||'APK';
+  document.getElementById('eSize').value=g.size||'';
+  const p=document.getElementById('eImgPrev');
+  if(g.imageUrl){p.src=g.imageUrl;p.classList.add('show')}else p.classList.remove('show');
+  document.getElementById('editModal').classList.add('show');
+}
+function closeModal(){document.getElementById('editModal').classList.remove('show')}
+async function saveEdit(){
+  const id=document.getElementById('editId').value;
+  try{
+    await fsPatch('games/'+id,{
+      title:document.getElementById('eTitle').value,
+      description:document.getElementById('eDesc').value,
+      imageUrl:document.getElementById('eImg').value,
+      downloadUrl:document.getElementById('eDl').value,
+      category:document.getElementById('eCat').value,
+      size:document.getElementById('eSize').value
+    });
+    showAlert('alEdit','s','✓ Сохранено!');
+    setTimeout(closeModal,700);loadGames();
+  }catch(e){showAlert('alEdit','e','Ошибка: '+e.message)}
+}
+
+function showAlert(id,type,msg){
+  const el=document.getElementById(id);
+  el.className='alert alert-'+(type==='s'?'s':'e')+' show';
+  el.textContent=msg;
+  setTimeout(()=>el.classList.remove('show'),4000);
+}
+function setStatus(on){
+  const dot=document.getElementById('sDot'),txt=document.getElementById('sTxt'),st=document.getElementById('stStatus');
+  if(on){dot.style.background='var(--green)';dot.style.boxShadow='0 0 8px var(--green)';txt.textContent='APP ONLINE';txt.style.color='var(--green)';st.textContent='● ON';st.style.color='var(--green)'}
+  else{dot.style.background='var(--red)';dot.style.boxShadow='0 0 8px var(--red)';txt.textContent='APP OFFLINE';txt.style.color='var(--red)';st.textContent='● OFF';st.style.color='var(--red)'}
+}
+function prevImg(){const s=document.getElementById('fImg').value,p=document.getElementById('imgPrev');if(s){p.src=s;p.classList.add('show')}else p.classList.remove('show')}
+function prevEditImg(){const s=document.getElementById('eImg').value,p=document.getElementById('eImgPrev');if(s){p.src=s;p.classList.add('show')}else p.classList.remove('show')}
+function syncColor(tid,cid){document.getElementById(tid).value=document.getElementById(cid).value}
+function syncColor2(tid,cid){try{document.getElementById(cid).value=document.getElementById(tid).value}catch(e){}}
+
+window.onload=()=>{
+  const pid=localStorage.getItem('zPid'),key=localStorage.getItem('zKey');
+  if(pid&&key){document.getElementById('cfgPid').value=pid;document.getElementById('cfgKey').value=key;PID=pid;KEY=key;connected=true;document.getElementById('stFb').textContent='OK';document.getElementById('stFb').style.color='var(--green)';setStatus(true);loadAll()}
+}
+</script>
+</body>
+</html>
