@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GameVault Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&family=Nunito:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #080810;
+  --bg2:      #10101E;
+  --bg3:      #16162A;
+  --bg4:      #1E1E38;
+  --accent:   #E94560;
+  --accent2:  #FF6B6B;
+  --blue:     #229ED9;
+  --green:    #00FF88;
+  --purple:   #9B59B6;
+  --text:     #CDD6F4;
+  --sub:      #8892B0;
+  --border:   #2A2A4A;
+  --card:     #12122A;
+  --mono:     'IBM Plex Mono', monospace;
+  --head:     'Rajdhani', sans-serif;
+  --body:     'Nunito', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+}
+
+/* ── SCANLINE EFFECT ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--bg2);
+  border-bottom: 2px solid var(--accent);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky; top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 40px rgba(233,69,96,0.2);
+}
+.logo {
+  font-family: var(--head);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.logo span { color: var(--text); }
+header .spacer { flex: 1; }
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.status-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+}
+
+/* ── LAYOUT ── */
+.wrapper {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .wrapper { grid-template-columns: 1fr; }
+}
+
+/* ── SETUP BANNER ── */
+.setup-banner {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #1a0a1a, #1a1a0a);
+  border: 1px solid #FF8800;
+  padding: 16px 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.setup-banner .icon { font-size: 24px; }
+.setup-banner strong { color: #FF8800; font-size: 15px; display: block; margin-bottom: 4px; }
+.setup-banner p { color: var(--sub); font-size: 13px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 0;
+  overflow: hidden;
+}
+.card-header {
+  background: var(--bg3);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--head);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.card-header .dot {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.card-body { padding: 20px; }
+
+/* ── FORM ── */
+.field { margin-bottom: 16px; }
+label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--sub);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+input[type=text], input[type=url], textarea, select {
+  width: 100%;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 14px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color .2s;
+  border-radius: 0;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(233,69,96,0.15);
+}
+textarea { resize: vertical; min-height: 80px; }
+select { cursor: pointer; }
+select option { background: var(--bg4); }
+
+/* ── TOGGLE SWITCH ── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.toggle-label { font-size: 14px; color: var(--text); }
+.toggle-sub { font-size: 12px; color: var(--sub); }
+.toggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; inset: 0;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: .3s;
+  border-radius: 28px;
+}
+.slider:before {
+  content: '';
+  position: absolute;
+  height: 20px; width: 20px;
+  left: 3px; bottom: 3px;
+  background: var(--sub);
+  transition: .3s;
+  border-radius: 50%;
+}
+input:checked + .slider { background: rgba(0,255,136,0.15); border-color: var(--green); }
+input:checked + .slider:before {
+  transform: translateX(24px);
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  font-family: var(--head);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+  outline: none;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-success { background: #00AA55; color: #fff; }
+.btn-success:hover { background: var(--green); color: #000; }
+.btn-danger { background: #C0003A; color: #fff; }
+.btn-danger:hover { background: var(--accent); }
+.btn-ghost {
+  background: transparent;
+  color: var(--sub);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-full { width: 100%; justify-content: center; }
+.btn-sm { padding: 7px 14px; font-size: 12px; }
+
+/* ── GAME CARDS LIST ── */
+.games-list { display: flex; flex-direction: column; gap: 12px; }
+.game-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 14px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: border-color .2s;
+  position: relative;
+}
+.game-card:hover { border-color: var(--accent); }
+.game-card img {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  background: var(--bg4);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.game-card-info { flex: 1; min-width: 0; }
+.game-card-info h4 {
+  font-family: var(--head);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.game-card-info p {
+  font-size: 12px;
+  color: var(--sub);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.game-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.category-tag {
+  display: inline-block;
+  background: rgba(233,69,96,0.15);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  margin-bottom: 6px;
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 700px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--head);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--sub);
+  letter-spacing: 1px;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+/* ── ALERTS ── */
+.alert {
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+.alert-success { background: rgba(0,255,136,0.1); border-left: 3px solid var(--green); color: var(--green); }
+.alert-error   { background: rgba(233,69,96,0.1); border-left: 3px solid var(--accent); color: var(--accent); }
+.alert.show    { display: block; }
+
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-bg.show { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-header {
+  background: var(--bg3);
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--head);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.modal-close {
+  background: none; border: none;
+  color: var(--sub); font-size: 20px;
+  cursor: pointer; line-height: 1;
+}
+.modal-close:hover { color: var(--accent); }
+.modal-body { padding: 20px; }
+
+/* ── FIREBASE CONFIG SECTION ── */
+.config-section {
+  background: var(--bg3);
+  border: 1px solid #2A2A4A;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+.config-section h3 {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--sub);
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.config-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.config-row input { flex: 1; }
+.config-row .btn { flex-shrink: 0; }
+
+/* ── SEPARATOR ── */
+.sep {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+/* ── LOADING SPINNER ── */
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── IMAGE PREVIEW ── */
+.img-preview {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  margin-top: 8px;
+  display: none;
+}
+.img-preview.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">GAME<span>VAULT</span></div>
+  <span style="font-family:var(--mono);font-size:11px;color:var(--border);">// ADMIN PANEL v2.0</span>
+  <div class="spacer"></div>
+  <div class="status-dot" id="statusDot"></div>
+  <span class="status-text" id="statusText">CONNECTING...</span>
+</header>
+
+<div class="wrapper">
+
+  <!-- SETUP WARNING -->
+  <div class="setup-banner" id="setupBanner">
+    <div class="icon">⚠️</div>
+    <div>
+      <strong>Настройте Firebase перед использованием</strong>
+      <p>Введите Project ID и API Key в разделе настроек ниже, затем нажмите «Подключить».</p>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statGames">0</div>
+      <div class="stat-label">Игр</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statStatus" style="color:var(--green);font-size:22px">●</div>
+      <div class="stat-label">Статус</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statConnected" style="font-size:16px;color:var(--sub)">—</div>
+      <div class="stat-label">Firebase</div>
+    </div>
+    <div class="stat-card">
+      <button class="btn btn-primary btn-sm" onclick="loadAll()" style="margin-top:4px">↺ Обновить</button>
+      <div class="stat-label" style="margin-top:8px">Данные</div>
+    </div>
+  </div>
+
+  <!-- LEFT COLUMN: Controls -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+
+    <!-- FIREBASE SETTINGS -->
+    <div class="card" id="firebaseCard">
+      <div class="card-header"><div class="dot"></div> Firebase Config</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Project ID</label>
+          <input type="text" id="cfgProjectId" placeholder="your-project-id"/>
+        </div>
+        <div class="field">
+          <label>API Key (Web)</label>
+          <input type="text" id="cfgApiKey" placeholder="AIzaSy..."/>
+        </div>
+        <div id="alertConnect" class="alert"></div>
+        <button class="btn btn-success btn-full" onclick="connectFirebase()">
+          ⚡ Подключить
+        </button>
+      </div>
+    </div>
+
+    <!-- SERVER SWITCH -->
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--green)"></div> Онлайн-Сервер</div>
+      <div class="card-body">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">🟢 Приложение активно</div>
+            <div class="toggle-sub">Выключите — покажет экран обновления</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="appEnabled" checked onchange="saveConfig()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="field">
+          <label>Сообщение об обновлении</label>
+          <textarea id="updateMessage" rows="3" placeholder="Приложение обновляется...&#10;Подпишитесь на Telegram!">🔧 Идёт обновление приложения!
+
+Новая версия выйдет совсем скоро. Подпишитесь на Telegram чтобы не пропустить!</textarea>
+        </div>
+        <div id="alertConfig" class="alert"></div>
+        <button class="btn btn-primary btn-full" onclick="saveConfig()">💾 Сохранить конфиг</button>
+      </div>
+    </div>
+
+    <!-- ADD GAME FORM -->
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--blue)"></div> Добавить игру</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Название</label>
+          <input type="text" id="fTitle" placeholder="Minecraft PE"/>
+        </div>
+        <div class="field">
+          <label>Описание</label>
+          <textarea id="fDesc" rows="3" placeholder="Описание игры..."></textarea>
+        </div>
+        <div class="field">
+          <label>URL картинки</label>
+          <div style="display:flex;gap:6px">
+            <input type="url" id="fImage" placeholder="https://i.imgur.com/..." oninput="previewImg()"/>
+          </div>
+          <img id="imgPreview" class="img-preview" alt="preview"/>
+        </div>
+        <div class="field">
+          <label>Ссылка скачать</label>
+          <input type="url" id="fDownload" placeholder="https://apkpure.com/..."/>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field">
+            <label>Категория</label>
+            <select id="fCategory">
+              <option>APK</option>
+              <option>MOD APK</option>
+              <option>Game</option>
+              <option>App</option>
+              <option>OBB</option>
+              <option>Patch</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Размер</label>
+            <input type="text" id="fSize" placeholder="250 MB"/>
+          </div>
+        </div>
+        <div id="alertAdd" class="alert"></div>
+        <button class="btn btn-primary btn-full" id="btnAdd" onclick="addGame()">
+          + ДОБАВИТЬ ИГРУ
+        </button>
+      </div>
+    </div>
+
+  </div><!-- end left -->
+
+  <!-- RIGHT COLUMN: Games list -->
+  <div class="card" style="align-self:start;">
+    <div class="card-header">
+      <div class="dot" style="background:var(--purple)"></div>
+      Список игр
+      <span id="gamesCount" style="font-size:12px;color:var(--sub);margin-left:auto;font-family:var(--mono);">0 игр</span>
+    </div>
+    <div class="card-body">
+      <div id="gamesList" class="games-list">
+        <div style="text-align:center;padding:40px 0;color:var(--sub);font-family:var(--mono);font-size:13px;">
+          // Подключите Firebase для загрузки...
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end wrapper -->
+
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      ✏️ Редактировать игру
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editDocId"/>
+      <div class="field"><label>Название</label><input type="text" id="editTitle"/></div>
+      <div class="field"><label>Описание</label><textarea id="editDesc" rows="3"></textarea></div>
+      <div class="field"><label>URL картинки</label><input type="url" id="editImage" oninput="previewEditImg()"/></div>
+      <img id="editImgPreview" class="img-preview" alt="preview"/>
+      <div class="field" style="margin-top:8px"><label>Ссылка скачать</label><input type="url" id="editDownload"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Категория</label>
+          <select id="editCategory">
+            <option>APK</option><option>MOD APK</option><option>Game</option>
+            <option>App</option><option>OBB</option><option>Patch</option>
+          </select>
+        </div>
+        <div class="field"><label>Размер</label><input type="text" id="editSize"/></div>
+      </div>
+      <div id="alertEdit" class="alert"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="closeModal()" style="flex:1">Отмена</button>
+        <button class="btn btn-primary" onclick="saveEdit()" style="flex:2">💾 Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let PROJECT_ID = localStorage.getItem('gv_project') || '';
+let API_KEY    = localStorage.getItem('gv_apikey')   || '';
+let connected  = false;
+let gamesData  = []; // {id, title, description, imageUrl, downloadUrl, category, size}
+
+// ─── FIRESTORE REST HELPERS ──────────────────────────────────────
+const BASE = () => `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+const AUTH = () => `key=${API_KEY}`;
+
+async function fsGet(path) {
+  const r = await fetch(`${BASE()}/${path}?${AUTH()}`);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function fsPatch(path, fields) {
+  const body = { fields: toFsFields(fields) };
+  const keys = Object.keys(fields).map(k => `updateMask.fieldPaths=${k}`).join('&');
+  const r = await fetch(`${BASE()}/${path}?${AUTH()}&${keys}`, {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function fsCreate(collection, fields) {
+  const r = await fetch(`${BASE()}/${collection}?${AUTH()}`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ fields: toFsFields(fields) })
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function fsDelete(path) {
+  const r = await fetch(`${BASE()}/${path}?${AUTH()}`, { method: 'DELETE' });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+// Convert plain object → Firestore fields format
+function toFsFields(obj) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === 'boolean') out[k] = { booleanValue: v };
+    else out[k] = { stringValue: String(v) };
+  }
+  return out;
+}
+
+// Convert Firestore doc → plain object
+function fromFsDoc(doc) {
+  const f = doc.fields || {};
+  const obj = {};
+  for (const [k, v] of Object.entries(f)) {
+    if (v.booleanValue !== undefined) obj[k] = v.booleanValue;
+    else if (v.stringValue !== undefined) obj[k] = v.stringValue;
+    else obj[k] = '';
+  }
+  // Extract doc ID from name path
+  obj._id = doc.name ? doc.name.split('/').pop() : '';
+  return obj;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CONNECT
+// ═══════════════════════════════════════════════════════════════
+async function connectFirebase() {
+  const pid = document.getElementById('cfgProjectId').value.trim();
+  const akey = document.getElementById('cfgApiKey').value.trim();
+  if (!pid || !akey) { showAlert('alertConnect','error','Заполните Project ID и API Key'); return; }
+
+  PROJECT_ID = pid;
+  API_KEY = akey;
+
+  try {
+    // Try reading config doc to verify connection
+    await fsGet('config/main');
+    connected = true;
+    localStorage.setItem('gv_project', pid);
+    localStorage.setItem('gv_apikey',  akey);
+    showAlert('alertConnect','success','✓ Подключено!');
+    updateStatus(true);
+    document.getElementById('setupBanner').style.display = 'none';
+    document.getElementById('statConnected').textContent = 'OK';
+    document.getElementById('statConnected').style.color = 'var(--green)';
+    loadAll();
+  } catch(e) {
+    // Config doc may not exist yet — try creating it
+    try {
+      await fsPatch('config/main', { enabled: true, updateMessage: 'Обновление...' });
+      connected = true;
+      localStorage.setItem('gv_project', pid);
+      localStorage.setItem('gv_apikey',  akey);
+      showAlert('alertConnect','success','✓ Подключено! Config создан.');
+      updateStatus(true);
+      document.getElementById('setupBanner').style.display = 'none';
+      loadAll();
+    } catch(e2) {
+      showAlert('alertConnect','error','Ошибка: ' + JSON.parse(e2.message||'{}').error?.message || e2.message);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LOAD ALL DATA
+// ═══════════════════════════════════════════════════════════════
+async function loadAll() {
+  if (!connected) return;
+  loadConfig();
+  loadGames();
+}
+
+async function loadConfig() {
+  try {
+    const doc = await fsGet('config/main');
+    const cfg = fromFsDoc(doc);
+    document.getElementById('appEnabled').checked = cfg.enabled !== false;
+    if (cfg.updateMessage) document.getElementById('updateMessage').value = cfg.updateMessage;
+    updateStatus(cfg.enabled !== false);
+  } catch(e) {}
+}
+
+async function loadGames() {
+  try {
+    const data = await fsGet('games');
+    gamesData = (data.documents || []).map(fromFsDoc);
+    renderGames();
+    document.getElementById('statGames').textContent = gamesData.length;
+    document.getElementById('gamesCount').textContent = gamesData.length + ' игр';
+  } catch(e) {
+    document.getElementById('gamesList').innerHTML =
+      `<div style="color:var(--accent);font-family:var(--mono);font-size:13px;padding:20px">Ошибка загрузки: ${e.message}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER GAMES
+// ═══════════════════════════════════════════════════════════════
+function renderGames() {
+  const list = document.getElementById('gamesList');
+  if (!gamesData.length) {
+    list.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--sub);font-family:var(--mono);font-size:13px;">// Нет игр. Добавьте первую!</div>`;
+    return;
+  }
+  list.innerHTML = gamesData.map((g,i) => `
+    <div class="game-card">
+      <img src="${g.imageUrl || ''}" alt=""
+        onerror="this.style.background='var(--bg4)';this.removeAttribute('src')"/>
+      <div class="game-card-info">
+        <div class="category-tag">${g.category || 'APK'}</div>
+        <h4>${escape(g.title)}</h4>
+        <p>${escape(g.description)}</p>
+        ${g.size ? `<div style="font-size:11px;color:var(--border);margin-top:4px;font-family:var(--mono)">📦 ${g.size}</div>` : ''}
+      </div>
+      <div class="game-card-actions">
+        <button class="btn btn-ghost btn-sm" onclick='openEdit(${i})' title="Редактировать">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick='deleteGame("${g._id}")' title="Удалить">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+function escape(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SAVE CONFIG (server switch)
+// ═══════════════════════════════════════════════════════════════
+async function saveConfig() {
+  if (!connected) { showAlert('alertConfig','error','Сначала подключите Firebase'); return; }
+  const enabled = document.getElementById('appEnabled').checked;
+  const msg = document.getElementById('updateMessage').value;
+  try {
+    await fsPatch('config/main', { enabled, updateMessage: msg });
+    showAlert('alertConfig','success', enabled ? '✓ Приложение ВКЛЮЧЕНО' : '⚠ Приложение ВЫКЛЮЧЕНО');
+    updateStatus(enabled);
+  } catch(e) {
+    showAlert('alertConfig','error','Ошибка: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ADD GAME
+// ═══════════════════════════════════════════════════════════════
+async function addGame() {
+  if (!connected) { showAlert('alertAdd','error','Сначала подключите Firebase'); return; }
+  const title    = document.getElementById('fTitle').value.trim();
+  const desc     = document.getElementById('fDesc').value.trim();
+  const imageUrl = document.getElementById('fImage').value.trim();
+  const dlUrl    = document.getElementById('fDownload').value.trim();
+  const category = document.getElementById('fCategory').value;
+  const size     = document.getElementById('fSize').value.trim();
+
+  if (!title || !dlUrl) { showAlert('alertAdd','error','Название и ссылка обязательны'); return; }
+
+  const btn = document.getElementById('btnAdd');
+  btn.innerHTML = '<span class="spinner"></span> Добавление...';
+  btn.disabled = true;
+
+  try {
+    await fsCreate('games', { title, description: desc, imageUrl, downloadUrl: dlUrl, category, size });
+    showAlert('alertAdd','success','✓ Игра добавлена!');
+    // Clear form
+    ['fTitle','fDesc','fImage','fDownload','fSize'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('imgPreview').classList.remove('show');
+    loadGames();
+  } catch(e) {
+    showAlert('alertAdd','error','Ошибка: ' + e.message);
+  } finally {
+    btn.innerHTML = '+ ДОБАВИТЬ ИГРУ';
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DELETE GAME
+// ═══════════════════════════════════════════════════════════════
+async function deleteGame(docId) {
+  if (!confirm('Удалить эту игру?')) return;
+  try {
+    await fsDelete('games/' + docId);
+    loadGames();
+  } catch(e) {
+    alert('Ошибка удаления: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  EDIT MODAL
+// ═══════════════════════════════════════════════════════════════
+function openEdit(i) {
+  const g = gamesData[i];
+  document.getElementById('editDocId').value = g._id;
+  document.getElementById('editTitle').value = g.title || '';
+  document.getElementById('editDesc').value = g.description || '';
+  document.getElementById('editImage').value = g.imageUrl || '';
+  document.getElementById('editDownload').value = g.downloadUrl || '';
+  document.getElementById('editCategory').value = g.category || 'APK';
+  document.getElementById('editSize').value = g.size || '';
+  const prev = document.getElementById('editImgPreview');
+  if (g.imageUrl) { prev.src = g.imageUrl; prev.classList.add('show'); }
+  else prev.classList.remove('show');
+  document.getElementById('editModal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('editModal').classList.remove('show');
+}
+async function saveEdit() {
+  const id = document.getElementById('editDocId').value;
+  const fields = {
+    title:       document.getElementById('editTitle').value,
+    description: document.getElementById('editDesc').value,
+    imageUrl:    document.getElementById('editImage').value,
+    downloadUrl: document.getElementById('editDownload').value,
+    category:    document.getElementById('editCategory').value,
+    size:        document.getElementById('editSize').value,
+  };
+  try {
+    await fsPatch('games/' + id, fields);
+    showAlert('alertEdit','success','✓ Сохранено!');
+    setTimeout(closeModal, 800);
+    loadGames();
+  } catch(e) {
+    showAlert('alertEdit','error','Ошибка: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════════════════════
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'alert alert-' + type + ' show';
+  el.textContent = msg;
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+function updateStatus(enabled) {
+  const dot  = document.getElementById('statusDot');
+  const txt  = document.getElementById('statusText');
+  const stat = document.getElementById('statStatus');
+  if (enabled) {
+    dot.style.background = 'var(--green)';
+    dot.style.boxShadow  = '0 0 8px var(--green)';
+    txt.textContent = 'APP ONLINE';
+    txt.style.color = 'var(--green)';
+    stat.textContent = '● ON';
+    stat.style.color = 'var(--green)';
+  } else {
+    dot.style.background = 'var(--accent)';
+    dot.style.boxShadow  = '0 0 8px var(--accent)';
+    txt.textContent = 'APP OFFLINE';
+    txt.style.color = 'var(--accent)';
+    stat.textContent = '● OFF';
+    stat.style.color = 'var(--accent)';
+  }
+}
+function previewImg() {
+  const src = document.getElementById('fImage').value;
+  const img = document.getElementById('imgPreview');
+  if (src) { img.src = src; img.classList.add('show'); }
+  else img.classList.remove('show');
+}
+function previewEditImg() {
+  const src = document.getElementById('editImage').value;
+  const img = document.getElementById('editImgPreview');
+  if (src) { img.src = src; img.classList.add('show'); }
+  else img.classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  AUTO-LOAD SAVED CREDENTIALS
+// ═══════════════════════════════════════════════════════════════
+window.onload = () => {
+  if (PROJECT_ID && API_KEY) {
+    document.getElementById('cfgProjectId').value = PROJECT_ID;
+    document.getElementById('cfgApiKey').value    = API_KEY;
+    connected = true;
+    document.getElementById('setupBanner').style.display = 'none';
+    document.getElementById('statConnected').textContent = 'OK';
+    document.getElementById('statConnected').style.color = 'var(--green)';
+    updateStatus(true);
+    loadAll();
+  }
+};
+</script>
+</body>
+</html>
